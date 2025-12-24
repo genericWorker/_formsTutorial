@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculate Miles Per Gallon</title>
+    <link rel="stylesheet" href="styles.css"> 
+</head>
+<body>
+
+    <main class="calculator-card">
+        <h1>MPG Calculator</h1>
+
+        <div class="input-group">
+            <label for="miles">Miles Driven:</label>
+            <input type="number" id="miles" placeholder="e.g. 300" step="0.1" required min="0.1">
+        </div>
+
+        <div class="input-group">
+            <label for="gallons">Gallons Used:</label>
+            <input type="number" id="gallons" placeholder="e.g. 10" step="0.1" required min="0.1">
+        </div>
+
+        <div class="input-group">
+            <label for="mpg_result">Calculated MPG:</label>
+            <input type="text" id="mpg_result" placeholder="---" disabled>
+        </div>
+        <span id="error_message" style="color: red; height: 1.2em;"></span>
+        <div class="button-group">
+            <button id="calculate_btn">Calculate</button>
+            <button id="clear_btn">Clear</button>
+        </div>
+
+        <hr>
+          
+        <p class="footer-text">Thanks for using MPG Calculator!</p>
+        <a href="index.html" class="back-menu">Back to main menu</a>
+    </main>
+
+    <script src="mpg.js"></script> 
+</body>
+</html>
