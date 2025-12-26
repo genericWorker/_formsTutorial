@@ -138,6 +138,7 @@ li:nth-child(3) a { background-color: #e76f51; }
 li:nth-child(4) a { background-color: #7b2cbf; }
 li:nth-child(5) a { background-color: hsl(345, 63%, 46%); }
 li:nth-child(6) a { background-color: hwb(216 17% 25%); }
+li:nth-child(7) a { background-color: lab(68.02% -63.78 56.83); }
 
 li a:hover { filter: brightness(85%); }
 
