@@ -1,17 +1,14 @@
 "use strict";
 
-// Helper for selecting elements
+// Helper for selecting elements.  The $ constant allows us to use jQuery type selector 
 const $ = selector => document.querySelector(selector);
-
 // Error message templates
 const getErrorMsg = lbl => `${lbl} must be a valid number greater than zero.`;
-const getErrorMsgTax = lbl => `${lbl} must be a valid number greater than 0 and less than 100.`;
-
+const getErrorMsgTax = lbl => `${lbl} must be a valid number greater than zero and less than 100.`;
 /**
  * Logic Functions
  */
 const calculateTax = (subtotal, taxRate) => (subtotal * taxRate) / 100;
-
 const focusAndSelect = selector => {
     const elem = $(selector);
     if (elem) {
@@ -21,16 +18,15 @@ const focusAndSelect = selector => {
 };
 
 /**
- * Event Handlers
+ * Event Handlers for click events
  */
 const processEntries = () => {
     const sale = parseFloat($("#sale").value);
     const tax = parseFloat($("#tax").value);
     const errorDisplay = $("#error_message");
-    
-    // Reset display
+   
+    // Reset display and error message field
     errorDisplay.textContent = "";
-
     // Validation Logic
     if (isNaN(sale) || sale <= 0) {
         errorDisplay.textContent = getErrorMsg("Sale amount");
@@ -60,12 +56,12 @@ const clearEntries = () => {
 };
 
 /**
- * Initialization
+ * Initialization.  This occurs when page (DOM) is first loaded, event listeners are set
  */
 document.addEventListener("DOMContentLoaded", () => {
     $("#calculate_btn").addEventListener("click", processEntries);
     $("#clear_btn").addEventListener("click", clearEntries);
-    
+  
     // Allow pressing "Enter" to calculate
     const inputs = document.querySelectorAll("input");
     inputs.forEach(input => {
@@ -73,6 +69,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (e.key === "Enter") processEntries();
         });
     });
-
+    //  Set the cursor on the sale element with id.  The #sale selector looks for element with id "sale" 
     $("#sale").focus();
 });
