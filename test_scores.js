@@ -1,149 +1,102 @@
-
 let namesArr = ['Ben', 'Joel', 'Judy', 'Anne'];
 let scoresArr = [88, 98, 77, 88];
 
+// Helper to calculate average
 function getAvgScore() {
-    let i = 0,
-        sum = 0,
-        len = scoresArr.length;
-    let name = '';
-    for (i; i < len; i++) {
-        sum += scoresArr[i];
-    }
-    return sum / len;
+    if (scoresArr.length === 0) return 0;
+    let sum = scoresArr.reduce((a, b) => a + b, 0);
+    return (sum / scoresArr.length).toFixed(1);
 }
 
+// Helper to find high score
 function getHighScore() {
-    let i = 0,
-        max = 0,
-        len = scoresArr.length;
-    let name = '';
-    for (i; i < len; i++) {
-        if (scoresArr[i] > max) {
-            max = scoresArr[i];
-            name = namesArr[i];
-        }
+    if (scoresArr.length === 0) return "N/A";
+    let max = Math.max(...scoresArr);
+    let index = scoresArr.lastIndexOf(max); // Gets the most recent person with the high score
+    return namesArr[index] + ' with score of ' + max;
+}
+
+// Updates the summary (Average and High Score)
+function updateSummary() {
+    $('#highScore').html(getHighScore());
+    $('#avgScore').html(getAvgScore());
+}
+
+// The "Single Source of Truth" for the table
+function renderTable() {
+    const tableBody = $('#scores_table tbody');
+    // Clear all rows except the header
+    $('#scores_table tr:gt(0)').remove(); 
+
+    // Rebuild table from the arrays
+    for (let i = 0; i < namesArr.length; i++) {
+        $('#scores_table').append(`<tr><td>${namesArr[i]}</td><td>${scoresArr[i]}</td></tr>`);
     }
-    return name + ' with score of ' + max;
-}
-
-function initializeResults() {
-    let avgs = $('#avgs');
-    let high = getHighScore();
-    let avg = getAvgScore().toFixed(1);
-    $('#highScore').html(high);
-    $('#avgScore').html(avg);
-}
-
-
-function displayResults() {
-    let results = $('#avgs');
-    results.toggle();
-    $('#error_message').html('');
-}
-
-//  insert a new element in the html table after current index.  Assumes, names and scores are updates already.
-function insertTableElement(scoresTable, index) {
-    $('scoresTable tr:last').after('<tr> <td>' + namesArr[index] + '</td><td>' + scoresArr[index] + '</td></tr>');
-}
-
-function insertNewTableElement(newName, newScore) {
-    let rowCount = document.getElementById("scores_table").getElementsByTagName("tr").length;
-    $('#scoresTable tr:last').append('<tr> <td>' + newName + '</td><td>' + newScore + '</td></tr>');
-    rowCount = document.getElementById("scores_table").getElementsByTagName("tr").length;
-}
-
-function initializeScoresTable() {
-    // Remove header row from table
-    $('#scores_table tr').slice(1).remove();
-    for (let i = 0; i < scoresArr.length; i++) {
-        insertNewTableElement($('#scores_table tr:last').after('<tr> <td>' + namesArr[i] + '</td><td>' + scoresArr[i] + '</td></tr>'));
-    }
-}
-
-function displayScores() {
-    let scores = $('#scores');
-    scores.toggle();
-     $('#error_message').html('');
 }
 
 function addScore() {
-    let scoreField = $('#score');
-    let nameField = $('#name');
-    let nameValue = nameField.val().trim(); // Use trim to remove accidental whitespace
-    let scoreValue = scoreField.val();
+    let scoreInput = $('#score');
+    let nameInput = $('#name');
+    let nameValue = nameInput.val().trim();
+    let scoreValue = parseInt(scoreInput.val());
 
-    // 1. Check if fields are empty
-    if (nameValue === '' || scoreValue === '') {
-        $('#error_message').html('Name and score must have values');
+    // Validation: Not empty and Alphabetic only
+    let alphaRegex = /^[A-Za-z\s]+$/;
+    
+    if (nameValue === '' || isNaN(scoreValue)) {
+        $('#error_message').html('Please enter both a name and a numeric score.');
         return;
     }
 
-    // 2. Check if name is alphabetic only
-    // This regex allows uppercase and lowercase letters
-    let alphaRegex = /^[A-Za-z\s]+$/; 
     if (!alphaRegex.test(nameValue)) {
-        $('#error_message').html('Name must contain only letters');
+        $('#error_message').html('Name must contain only letters.');
         return;
     }
 
-    // Clear error message if validation passes
+    // Success: Update Data
     $('#error_message').html('');
-
-    // Push values to arrays
-    scoresArr.push(parseInt(scoreValue));
     namesArr.push(nameValue);
+    scoresArr.push(scoreValue);
 
     // Update UI
-    initializeScoresTable();
-    // Note: insertNewTableElement might be redundant if initializeScoresTable re-renders the whole list
-    
-    scoreField.val('');
-    nameField.val('');
-    nameField.focus();
-    
-    initializeResults();
-    $('#scores').show();
-    $('#results').show();
+    renderTable();
+    updateSummary();
+
+    // Reset Form
+    nameInput.val('').focus();
+    scoreInput.val('');
 }
 
+// UI Toggles
+function toggleResults() {
+    $('#avgs').toggle();
+}
 
-window.onload = function () {
-    $('#display_results').on('click',  function() {
-        displayResults();
-    });
-     
-    $('#display_scores').on('click',  function() {
-        displayScores();
-    });
-    $('#add').on('click',  function() {
-        addScore();
-    });
+function toggleScores() {
+    $('#scores').toggle();
+}
 
-    let name = $('#name');
-    let score = $('#score');
+$(document).ready(function () {
+    // Initial Render
+    renderTable();
+    updateSummary();
 
-    name.focus();
-    initializeResults();
-    initializeScoresTable();
+    // Event Listeners
+    $('#display_results').on('click', toggleResults);
+    $('#display_scores').on('click', toggleScores);
+    $('#add').on('click', addScore);
 
-    // register jQuery extension
-    // used for changing focus on enter ekey
-    jQuery.extend(jQuery.expr[':'], {
-        focusable: function(el, index, selector) {
-            return $(el).is('a, button, :input, [tabindex]');
-        }
-    });
-
-    //  Changes focus to next input on enter key
-    $(document).on('keypress', 'input,select', function(e) {
+    // Enter Key Navigation
+    $(document).on('keypress', 'input', function(e) {
         if (e.key === "Enter") {
             e.preventDefault();
-            // Get all focusable elements on the page
-            let $canfocus = $(':focusable');
-            let index = $canfocus.index(this) + 1;
-            if (index >= $canfocus.length) index = 0;
-            $canfocus.eq(index).focus();
+            let inputs = $('input');
+            let nextIndex = inputs.index(this) + 1;
+            if (nextIndex < inputs.length) {
+                inputs.eq(nextIndex).focus();
+            } else {
+                addScore(); // If on the last input, trigger the add
+            }
         }
     });
-}
+});
