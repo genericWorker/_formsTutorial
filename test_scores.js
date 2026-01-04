@@ -68,23 +68,45 @@ function displayScores() {
 }
 
 function addScore() {
-    let score = $('#score');
-    let name = $('#name');
-    if (score.val() === '' || name.val() === '') {
+    let scoreField = $('#score');
+    let nameField = $('#name');
+    let nameValue = nameField.val().trim(); // Use trim to remove accidental whitespace
+    let scoreValue = scoreField.val();
+
+    // 1. Check if fields are empty
+    if (nameValue === '' || scoreValue === '') {
         $('#error_message').html('Name and score must have values');
         return;
     }
+
+    // 2. Check if name is alphabetic only
+    // This regex allows uppercase and lowercase letters
+    let alphaRegex = /^[A-Za-z\s]+$/; 
+    if (!alphaRegex.test(nameValue)) {
+        $('#error_message').html('Name must contain only letters');
+        return;
+    }
+
+    // Clear error message if validation passes
     $('#error_message').html('');
-    scoresArr.push(parseInt(score.val()));
-    namesArr.push($("#name").val());
+
+    // Push values to arrays
+    scoresArr.push(parseInt(scoreValue));
+    namesArr.push(nameValue);
+
+    // Update UI
     initializeScoresTable();
-    insertNewTableElement( name.val(), score.val() );
-    score.val('');
-    name.val('');
+    // Note: insertNewTableElement might be redundant if initializeScoresTable re-renders the whole list
+    
+    scoreField.val('');
+    nameField.val('');
+    nameField.focus();
+    
     initializeResults();
     $('#scores').show();
     $('#results').show();
 }
+
 
 window.onload = function () {
     $('#display_results').on('click',  function() {
