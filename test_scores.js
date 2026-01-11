@@ -1,101 +1,118 @@
+// Data Arrays
 let namesArr = ['Ben', 'Joel', 'Judy', 'Anne'];
 let scoresArr = [88, 98, 77, 88];
 
-// Helper to calculate average
-function getAvgScore() {
-    if (scoresArr.length === 0) return 0;
-    let sum = scoresArr.reduce((a, b) => a + b, 0);
-    return (sum / scoresArr.length).toFixed(1);
-}
+// Logic Functions
+const getAvgScore = () => {
+    const sum = scoresArr.reduce((a, b) => a + b, 0);
+    return sum / scoresArr.length;
+};
 
-// Helper to find high score
-function getHighScore() {
-    if (scoresArr.length === 0) return "N/A";
-    let max = Math.max(...scoresArr);
-    let index = scoresArr.lastIndexOf(max); // Gets the most recent person with the high score
-    return namesArr[index] + ' with score of ' + max;
-}
-
-// Updates the summary (Average and High Score)
-function updateSummary() {
-    $('#highScore').html(getHighScore());
-    $('#avgScore').html(getAvgScore());
-}
-
-// The "Single Source of Truth" for the table
-function renderTable() {
-    const tableBody = $('#scores_table tbody');
-    // Clear all rows except the header
-    $('#scores_table tr:gt(0)').remove(); 
-
-    // Rebuild table from the arrays
-    for (let i = 0; i < namesArr.length; i++) {
-        $('#scores_table').append(`<tr><td>${namesArr[i]}</td><td>${scoresArr[i]}</td></tr>`);
+const getHighScore = () => {
+    let max = 0;
+    let name = '';
+    for (let i = 0; i < scoresArr.length; i++) {
+        if (scoresArr[i] > max) {
+            max = scoresArr[i];
+            name = namesArr[i];
+        }
     }
-}
+    return `${name} with score of ${max}`;
+};
 
-function addScore() {
-    let scoreInput = $('#score');
-    let nameInput = $('#name');
-    let nameValue = nameInput.val().trim();
-    let scoreValue = parseInt(scoreInput.val());
-
-    // Validation: Not empty and Alphabetic only
-    let alphaRegex = /^[A-Za-z\s]+$/;
+// UI Initialization Functions
+const initializeResults = () => {
+    const high = getHighScore();
+    const avg = getAvgScore().toFixed(1);
     
-    if (nameValue === '' || isNaN(scoreValue)) {
-        $('#error_message').html('Please enter both a name and a numeric score.');
+    document.getElementById('highScore').innerHTML = high;
+    document.getElementById('avgScore').innerHTML = avg;
+};
+
+const insertNewTableElement = (newName, newScore) => {
+    const table = document.getElementById("scores_table");
+    const row = table.insertRow(-1); 
+    const cell1 = row.insertCell(0);
+    const cell2 = row.insertCell(1);
+    cell1.innerHTML = newName;
+    cell2.innerHTML = newScore;
+};
+
+const initializeScoresTable = () => {
+    const table = document.getElementById("scores_table");
+    
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
+    }
+
+    scoresArr.forEach((score, i) => {
+        insertNewTableElement(namesArr[i], score);
+    });
+};
+
+// Event Handler Functions
+const displayResults = () => {
+    const results = document.getElementById('avgs');
+    results.style.display = (results.style.display === 'none') ? 'block' : 'none';
+    document.getElementById('error_message').innerHTML = '';
+};
+
+const displayScores = () => {
+    const scores = document.getElementById('scores');
+    scores.style.display = (scores.style.display === 'none') ? 'block' : 'none';
+    document.getElementById('error_message').innerHTML = '';
+};
+
+const addScore = () => {
+    const scoreInput = document.getElementById('score');
+    const nameInput = document.getElementById('name');
+    const errorMsg = document.getElementById('error_message');
+
+    if (scoreInput.value === '' || nameInput.value === '') {
+        errorMsg.innerHTML = 'Name and score must have values';
         return;
     }
 
-    if (!alphaRegex.test(nameValue)) {
-        $('#error_message').html('Name must contain only letters.');
-        return;
-    }
+    errorMsg.innerHTML = '';
+    
+    scoresArr.push(parseInt(scoreInput.value));
+    namesArr.push(nameInput.value);
 
-    // Success: Update Data
-    $('#error_message').html('');
-    namesArr.push(nameValue);
-    scoresArr.push(scoreValue);
+    initializeScoresTable();
+    initializeResults();
 
-    // Update UI
-    renderTable();
-    updateSummary();
+    scoreInput.value = '';
+    nameInput.value = '';
+    nameInput.focus();
 
-    // Reset Form
-    nameInput.val('').focus();
-    scoreInput.val('');
-}
+    document.getElementById('scores').style.display = 'block';
+    document.getElementById('results').style.display = 'block';
+};
 
-// UI Toggles
-function toggleResults() {
-    $('#avgs').toggle();
-}
-
-function toggleScores() {
-    $('#scores').toggle();
-}
-
-$(document).ready(function () {
-    // Initial Render
-    renderTable();
-    updateSummary();
-
+// Main Execution
+window.addEventListener('load', () => {
     // Event Listeners
-    $('#display_results').on('click', toggleResults);
-    $('#display_scores').on('click', toggleScores);
-    $('#add').on('click', addScore);
+    document.getElementById('display_results').addEventListener('click', displayResults);
+    document.getElementById('display_scores').addEventListener('click', displayScores);
+    document.getElementById('add').addEventListener('click', addScore);
 
-    // Enter Key Navigation
-    $(document).on('keypress', 'input', function(e) {
-        if (e.key === "Enter") {
+    // Initial setup
+    document.getElementById('name').focus();
+    initializeResults();
+    initializeScoresTable();
+
+    // Handle "Enter" key
+    document.addEventListener('keypress', (e) => {
+        if (e.key === "Enter" && (e.target.tagName === "INPUT" || e.target.tagName === "SELECT")) {
             e.preventDefault();
-            let inputs = $('input');
-            let nextIndex = inputs.index(this) + 1;
-            if (nextIndex < inputs.length) {
-                inputs.eq(nextIndex).focus();
-            } else {
-                addScore(); // If on the last input, trigger the add
+
+            const focusableSelector = 'a, button, input, select, [tabindex]:not([tabindex="-1"])';
+            const focusables = Array.from(document.querySelectorAll(focusableSelector));
+            const index = focusables.indexOf(e.target);
+
+            if (index > -1) {
+                const nextElement = focusables[index + 1] || focusables[0];
+                nextElement.focus();
             }
         }
     });
